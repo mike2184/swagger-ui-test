@@ -47,7 +47,9 @@ body {
 				plugins : [ SwaggerUIBundle.plugins.DownloadUrl ],
 				layout : "StandaloneLayout",
 				requestInterceptor : function(req) {
-					//req.headers['x-test-header'] = 'test value';
+					// Having the following line of code that adds a header causes the generated curl request to change from
+					// -F "file=@cake.jpg;type=image/jpeg" to -d {"file":{}}
+					req.headers['x-test-header'] = 'test value'; 
 					return req;
 				}
 			})
