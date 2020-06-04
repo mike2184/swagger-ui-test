@@ -47,7 +47,7 @@ body {
 				plugins : [ SwaggerUIBundle.plugins.DownloadUrl ],
 				layout : "StandaloneLayout",
 				requestInterceptor : function(req) {
-					req.headers['x-test-header'] = 'test value';
+					//req.headers['x-test-header'] = 'test value';
 					return req;
 				}
 			})
