@@ -1,5 +1,8 @@
 import logo from './logo.svg';
 import './App.css';
+import History from './History'
+
+require('dotenv').config();
 
 function App() {
   return (
@@ -17,6 +20,9 @@ function App() {
         >
           Learn React
         </a>
+        <div className="history">
+          <History></History>
+        </div>
       </header>
     </div>
   );
