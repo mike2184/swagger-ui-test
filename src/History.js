@@ -63,7 +63,7 @@ export default class History extends React.Component {
         if (this.state.jobs.length === 0) {
             return (
                 <div>
-                    <button onClick={this.fetchJobsForImgOrg}>Fetch Job History for dummyImsOrg</button>
+                    <button onClick={() => {this.fetchJobsForImgOrg()}}>Fetch Job History for dummyImsOrg</button>
                     <div className="no-jobs">
                         There are no jobs to list!
                     </div>
@@ -72,14 +72,25 @@ export default class History extends React.Component {
             } else {
             return (
                 <div>
-                    <button onClick={this.fetchJobsForImgOrg}>Fetch Job History for dummyImsOrg</button>
-                    <ul className="job-list">
+                    <button onClick={() => {this.fetchJobsForImgOrg()}}>Fetch Job History for dummyImsOrg</button>
+                    <table className="job-list">
+                        <tr>
+                            <th>Job ID</th>
+                            <th>Job Instance ID</th>
+                            <th>Event Time</th>
+                            <th>Event Type</th>
+                            <th>Org ID</th>
+                        </tr>
                         {this.state.jobs.map(job => (
-                            <li className="job-list-item job-list-item-primary">
-                                {job}
-                            </li>
+                            <tr>
+                                <td>{job.jobId}</td>
+                                <td>{job.jobInstanceId}</td>
+                                <td>{job.eventTime}</td>
+                                <td>{job.eventType}</td>
+                                <td>{job.orgId}</td>
+                            </tr>
                         ))}
-                    </ul>
+                    </table>
                 </div>
             );
         }
