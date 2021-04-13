@@ -29,7 +29,7 @@ export default class History extends React.Component {
         }
         axios.post(process.env.REACT_APP_IMS_SERVICE_URL, params, config)
             .then((result) => {
-              console.log(result);
+              //console.log(result);
               this.setState({
                   accessToken: result.data.access_token
               });
