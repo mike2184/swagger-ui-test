@@ -30,7 +30,7 @@ class SearchBar extends React.Component{
           </div>
 
           <div class="form-check" onChange = {this.handleSearchTypeChange}>
-            <input type="radio" value = "jobId" id = "jobId" name="searchType" class="mr-1" checked />
+            <input type="radio" value = "jobId" id = "jobId" name="searchType" class="mr-1" defaultChecked />
             <label for="jobId" class="mr-2" >Job Id</label>
             <input type="radio" value = "jobInstanceId" id = "jobInstanceId" name="searchType" class="mr-1"/>
             <label for="jobInstanceId" class="mr-2">Job Instance Id</label>

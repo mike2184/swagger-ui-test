@@ -7,7 +7,7 @@ export default class History extends React.Component {
         this.state = {
           accessToken : "",
           jobs : [],
-          error : ""
+          error : "",
         }
     }
 
@@ -57,6 +57,10 @@ export default class History extends React.Component {
                 })
                 .catch((err) => {
                     console.log(err);
+                    this.setState({
+                        jobs: [],
+                        error: err.toString()
+                    });
             });
         }
         else {
@@ -83,7 +87,9 @@ export default class History extends React.Component {
                 <th>Event Type</th>
                 <th>Org ID</th>
               </tr>
-                {this.state.jobs.map(job => (
+                {this.state.error ? 
+                  this.state.error : 
+                  this.state.jobs.map(job => (
                   <tr>
                     <td>{job.jobId}</td>
                     <td>{job.jobInstanceId}</td>
@@ -91,7 +97,8 @@ export default class History extends React.Component {
                     <td>{job.eventType}</td>
                     <td>{job.orgId}</td>
                   </tr>
-                ))}
+                ))
+                }
               </table>
           </div>
       );
