@@ -11,3 +11,12 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+.error { 
+    border: 1px solid grey;
+    padding: 10pt 5pt;
+    margin: 10pt 5pt;
+    text-align: center;
+}
+

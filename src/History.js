@@ -40,6 +40,7 @@ export default class History extends React.Component {
     }
 
     fetchJobs() {
+        this.state.error = ""
         if(this.state.accessToken !== "") {
             const config = {
                 headers: {
@@ -57,19 +58,28 @@ export default class History extends React.Component {
                 })
                 .catch((err) => {
                     console.log(err);
-                    this.setState({
-                        jobs: [],
-                        error: err.toString()
-                    });
+                    this.setState({jobs: []});
+                    if (err.response && err.response.status) { 
+                        this.setState({error: this.handleErrorByResponse(err.response)});
+                    } else {
+                        this.setState({error: "Unknown error occurred. " + err});
+                    }
             });
         }
         else {
-          console.log("Access token is not set.");
-          this.setState({
-             error: "Access token is not set."
-          });
+            console.log("Access token is not set.");
+            this.setState({error: "Access token is not set."});
         }
 
+    }
+
+    handleErrorByResponse(response) { 
+        switch(response.status) { 
+            case 404:
+                return 'No results found';
+            default:
+                return 'Unknown status: ' + response.status;
+        }
     }
 
     render() {
@@ -79,28 +89,28 @@ export default class History extends React.Component {
             <button onClick={() => {this.fetchJobs()}} class="btn btn-secondary mr-2" > Reset </button>
             <br/>
 
-            <table className="job-list" class="table table-hover table-striped">
-              <tr>
-                <th>Job ID</th>
-                <th>Job Instance ID</th>
-                <th>Event Time</th>
-                <th>Event Type</th>
-                <th>Org ID</th>
-              </tr>
-                {this.state.error ? 
-                  this.state.error : 
-                  this.state.jobs.map(job => (
+            {this.state.error 
+            ? <div className="error"><p>{this.state.error}</p></div>
+            : <table className="job-list" class="table table-hover table-striped">
                   <tr>
-                    <td>{job.jobId}</td>
-                    <td>{job.jobInstanceId}</td>
-                    <td>{job.eventTime}</td>
-                    <td>{job.eventType}</td>
-                    <td>{job.orgId}</td>
+                    <th>Job ID</th>
+                    <th>Job Instance ID</th>
+                    <th>Event Time</th>
+                    <th>Event Type</th>
+                    <th>Org ID</th>
                   </tr>
-                ))
-                }
-              </table>
+                    {this.state.jobs.map(job => (
+                      <tr>
+                        <td>{job.jobId}</td>
+                        <td>{job.jobInstanceId}</td>
+                        <td>{job.eventTime}</td>
+                        <td>{job.eventType}</td>
+                        <td>{job.orgId}</td>
+                      </tr>
+                    ))}
+                  </table>
+            }
           </div>
-      );
+        );
     }
 }
