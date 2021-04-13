@@ -1,13 +1,13 @@
 import axios from 'axios';
 import React from 'react';
 
-export default class History extends React.Component {
+export default class Scheduler extends React.Component {
     constructor(props){
         super(props);
     
         this.state = {
             accessToken : "",
-            jobs: []
+            job: null
         }
     }
 
@@ -15,19 +15,25 @@ export default class History extends React.Component {
         this.getServiceToken();
     }
 
-    fetchJobsForImgOrg() {
+    fetchJobById() {
         if(this.state.accessToken !== "") {
             const config = {
                 headers: {
                   'Content-Type': 'application/json',
                   'x-service-auth': this.state.accessToken
+                },
+                params: {
+                    'solution': 'WORKSPACE',
+                    // TODO - I don't see event groups in history service but they are a required parameter to call
+                    // the scheduler service. Do we need to add event group to the information we store in history service?
+                    'eventGroup': 'testEventGroup' 
                 }
             }
-            axios.get(process.env.REACT_APP_HISTORY_SERVICE_URL + 'orgId/dummyImsOrg', config)
+            axios.get(process.env.REACT_APP_SCHEDULER_SERVICE_URL + 'events/test', config)
                 .then((result) => {
                     //console.log(result);
                     this.setState({
-                       jobs: result.data
+                       job: result.data
                     });
                 })
                 .catch((err) => {
@@ -39,9 +45,9 @@ export default class History extends React.Component {
     getServiceToken() { 
         const params = new URLSearchParams()
         params.append('grant_type', 'authorization_code');
-        params.append('client_id', process.env.REACT_APP_HISTORY_SERVICE_IMS_CLIENT_ID);
-        params.append('client_secret', process.env.REACT_APP_HISTORY_SERVICE_SECRET);
-        params.append('code', process.env.REACT_APP_HISTORY_SERVICE_AUTHCODE);
+        params.append('client_id', process.env.REACT_APP_SCHEDULER_SERVICE_IMS_CLIENT_ID);
+        params.append('client_secret', process.env.REACT_APP_SCHEDULER_SERVICE_SECRET);
+        params.append('code', process.env.REACT_APP_SCHEDULER_SERVICE_AUTHCODE);
         const config = {
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded'
@@ -60,20 +66,17 @@ export default class History extends React.Component {
     }
 
     render() {
-        if (this.state.jobs.length === 0) {
+        if (this.state.job === null) {
             return (
                 <div>
-                    <button onClick={() => {this.fetchJobsForImgOrg()}}>Fetch Job History for dummyImsOrg</button>
-                    <div className="no-jobs">
-                        There are no jobs to list!
-                    </div>
+                    <button onClick={() => {this.fetchJobById()}}>Fetch Job by ID</button>
                 </div>
             );
             } else {
             return (
                 <div>
-                    <button onClick={() => {this.fetchJobsForImgOrg()}}>Fetch Job History for dummyImsOrg</button>
-                    <table className="job-list">
+                    <button onClick={() => {this.fetchJobById()}}>Fetch Job by ID</button>
+                    <table className="job-info">
                         <tr>
                             <th>Job ID</th>
                             <th>Job Instance ID</th>
@@ -81,15 +84,13 @@ export default class History extends React.Component {
                             <th>Event Type</th>
                             <th>Org ID</th>
                         </tr>
-                        {this.state.jobs.map(job => (
-                            <tr key={job}>
-                                <td>{job.jobId}</td>
-                                <td>{job.jobInstanceId}</td>
-                                <td>{job.eventTime}</td>
-                                <td>{job.eventType}</td>
-                                <td>{job.orgId}</td>
-                            </tr>
-                        ))}
+                        <tr key={this.state.job}>
+                            <td>{this.state.job.jobId}</td>
+                            <td>{this.state.job.jobInstanceId}</td>
+                            <td>{this.state.job.eventTime}</td>
+                            <td>{this.state.job.eventType}</td>
+                            <td>{this.state.job.orgId}</td>
+                        </tr>
                     </table>
                 </div>
             );
