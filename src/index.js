@@ -58,7 +58,6 @@ class MainTable extends React.Component{
       super(props);
 
       this.state = {
-          accessToken : "",
           searchText : "",
           searchType : "jobId"
       }
@@ -67,33 +66,6 @@ class MainTable extends React.Component{
       this.handleSearchTypeChange = this.handleSearchTypeChange.bind(this);
   }
 
-  componentDidMount() {
-      this.getServiceToken();
-  }
-
-  getServiceToken() {
-      const params = new URLSearchParams()
-      params.append('grant_type', 'authorization_code');
-      params.append('client_id', process.env.REACT_APP_HISTORY_SERVICE_IMS_CLIENT_ID);
-      params.append('client_secret', process.env.REACT_APP_HISTORY_SERVICE_SECRET);
-      params.append('code', process.env.REACT_APP_HISTORY_SERVICE_AUTHCODE);
-
-      const config = {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-      }
-      axios.post(process.env.REACT_APP_IMS_SERVICE_URL, params, config)
-          .then((result) => {
-            console.log(result);
-            this.setState({
-                accessToken: result.data.access_token
-            });
-          })
-          .catch((err) => {
-              console.log(err);
-          });
-  }
 
   handleSearchTextChange(searchText){
     this.setState({
@@ -116,8 +88,7 @@ class MainTable extends React.Component{
           onSearchTextChange = {this.handleSearchTextChange}
           onSearchTypeChange = {this.handleSearchTypeChange} />
 
-          <History accessToken = {this.state.accessToken} searchText = {this.state.searchText}
-              searchType = {this.state.searchType} />
+          <History searchText = {this.state.searchText} searchType = {this.state.searchType} />
         </div>
       </div>
     );
