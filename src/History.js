@@ -15,6 +15,7 @@ export default class History extends React.Component {
         this.getServiceToken();
     }
 
+    // Get the service token to make history service calls
     getServiceToken() {
         const params = new URLSearchParams()
         params.append('grant_type', 'authorization_code');
@@ -39,6 +40,7 @@ export default class History extends React.Component {
             });
     }
 
+    // Call History service to fetch job information
     fetchJobs() {
         if(this.state.accessToken !== "") {
             const config = {
@@ -76,13 +78,16 @@ export default class History extends React.Component {
             <br/>
 
             <table className="job-list" class="table table-hover table-striped">
-              <tr>
-                <th>Job ID</th>
-                <th>Job Instance ID</th>
-                <th>Event Time</th>
-                <th>Event Type</th>
-                <th>Org ID</th>
-              </tr>
+              <thead class = "thead-dark" >
+                <tr>
+                  <th>Job ID</th>
+                  <th>Job Instance ID</th>
+                  <th>Event Time</th>
+                  <th>Event Type</th>
+                  <th>Org ID</th>
+                </tr>
+              </thead>
+
                 {this.state.jobs.map(job => (
                   <tr>
                     <td>{job.jobId}</td>
