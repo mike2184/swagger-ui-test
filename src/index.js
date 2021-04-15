@@ -11,6 +11,8 @@ class SearchBar extends React.Component{
       super(props);
       this.handleSearchTextChange = this.handleSearchTextChange.bind(this);
       this.handleSearchTypeChange = this.handleSearchTypeChange.bind(this);
+      this.handleStartTimeChange = this.handleStartTimeChange.bind(this);
+      this.handleEndTimeChange = this.handleEndTimeChange.bind(this);
   }
 
   handleSearchTextChange(e) {
@@ -19,6 +21,14 @@ class SearchBar extends React.Component{
 
   handleSearchTypeChange(e) {
     this.props.onSearchTypeChange(e.target.value);
+  }
+
+  handleStartTimeChange(e) {
+    this.props.onStartTimeChange(e.target.value);
+  }
+
+  handleEndTimeChange(e) {
+    this.props.onEndTimeChange(e.target.value);
   }
 
   render(){
@@ -46,6 +56,14 @@ class SearchBar extends React.Component{
               <option value="failed">Failed</option>
             </select>
           </div>
+
+          <div class="form-check">
+            <label>Search time: From </label>
+            <input name = "startTime" value = {this.props.startTime} onChange = {this.handleStartTimeChange} />
+            <label>to</label>
+            <input name = "endTime" value = {this.props.endTime} onChange = {this.handleEndTimeChange} />
+            <label>(Format: 2021-01-01 23:59:59)</label>
+          </div>
       </div>
     );
   }
@@ -59,11 +77,15 @@ class MainTable extends React.Component{
 
       this.state = {
           searchText : "",
-          searchType : "jobId"
+          searchType : "jobId",
+          startTime : null,
+          endTime : null
       }
 
       this.handleSearchTextChange = this.handleSearchTextChange.bind(this);
       this.handleSearchTypeChange = this.handleSearchTypeChange.bind(this);
+      this.handleStartTimeChange = this.handleStartTimeChange.bind(this);
+      this.handleEndTimeChange = this.handleEndTimeChange.bind(this);
   }
 
 
@@ -79,16 +101,32 @@ class MainTable extends React.Component{
     });
   }
 
+  handleStartTimeChange(startTime){
+    this.setState({
+        startTime: startTime
+    });
+  }
+
+  handleEndTimeChange(endTime){
+    this.setState({
+        endTime: endTime
+    });
+  }
+
   render(){
     return (
       <div class="container">
         <h1>History Service UI</h1>
         <div>
           <SearchBar searchText = {this.state.searchText} searchType = {this.state.searchType}
+          startTime = {this.state.startTime} endTime = {this.state.endTime}
           onSearchTextChange = {this.handleSearchTextChange}
-          onSearchTypeChange = {this.handleSearchTypeChange} />
+          onSearchTypeChange = {this.handleSearchTypeChange}
+          onStartTimeChange = {this.handleStartTimeChange}
+          onEndTimeChange = {this.handleEndTimeChange} />
 
-          <History searchText = {this.state.searchText} searchType = {this.state.searchType} />
+          <History searchText = {this.state.searchText} searchType = {this.state.searchType}
+           startTime = {this.state.startTime} endTime = {this.state.endTime} />
         </div>
       </div>
     );
