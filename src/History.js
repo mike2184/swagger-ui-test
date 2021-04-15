@@ -7,7 +7,9 @@ export default class History extends React.Component {
         this.state = {
           accessToken : "",
           jobs : [],
-          error : ""
+          error : "",
+          selectedCount: 0,
+          isSelected: false,
         }
     }
 
@@ -39,6 +41,19 @@ export default class History extends React.Component {
             });
     }
 
+    rescheduleJobs() { 
+        var count = 0;
+        var msgIds = "";
+        this.state.jobs.map((job) => { 
+            if (job.isChecked) { 
+                msgIds += job.jobId + "\n";
+                count += 1;
+            }
+        });
+        var message = `Are you sure you want to reschedule the following ${count} job(s)?\n${msgIds}`;
+        console.log(message);
+    }
+
     fetchJobs() {
         if(this.state.accessToken !== "") {
             const config = {
@@ -68,11 +83,23 @@ export default class History extends React.Component {
 
     }
 
+    handleChange(job, e) { 
+        job.isChecked = e.target.checked;
+        if (e.target.checked) { 
+            this.state.selectedCount += 1; 
+        } else { 
+            this.state.selectedCount -= 1; 
+        }
+        this.state.isSelected = this.state.selectedCount == 0 ? false : true;
+    }
+
     render() {
         return (
           <div>
             <button onClick={() => {this.fetchJobs()}} class="btn btn-primary mr-2" > Search </button>
             <button onClick={() => {this.fetchJobs()}} class="btn btn-secondary mr-2" > Reset </button>
+            <button onClick={() => {this.rescheduleJobs()}} class="btn btn-secondary mr-2"> Reschedule Job(s) </button>
+            <button onClick={() => {this.rescheduleJobs()}} class="btn btn-secondary mr-2" > More Info </button>
             <br/>
 
             <table className="job-list" class="table table-hover table-striped">
@@ -85,14 +112,7 @@ export default class History extends React.Component {
               </tr>
                 {this.state.jobs.map(job => (
                   <tr>
-                    <td>{job.jobId}</td>
-                    <td>{job.jobInstanceId}</td>
-                    <td>{job.eventTime}</td>
-                    <td>{job.eventType}</td>
-                    <td>{job.orgId}</td>
                   </tr>
-                ))}
-              </table>
           </div>
       );
     }
