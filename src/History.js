@@ -55,6 +55,12 @@ export default class History extends React.Component {
         console.log(message);
     }
 
+    pauseJobs() { 
+    }
+
+    resumeJobs() { 
+    }
+
     moreInfo() { 
     }
 
@@ -117,7 +123,6 @@ export default class History extends React.Component {
             }
             this.setState({selectedCount: this.state.selectedCount - 1}); 
         }
-//        this.forceUpdate();
     }
 
     render() {
@@ -127,7 +132,13 @@ export default class History extends React.Component {
             <button onClick={() => {this.fetchJobs()}} class="btn btn-secondary mr-2" > Reset </button>
             <button onClick={() => {this.rescheduleJobs()}} 
                 disabled={!this.state.hasSelected}
-                class="btn btn-secondary mr-2"> Reschedule Job(s) </button>
+                class="btn btn-secondary mr-2"> Reschedule Job{this.state.selectedCount > 1 ? "s" : ""} </button>
+            <button onClick={() => {this.pauseJobs()}} 
+                disabled={!this.state.hasSelected}
+                class="btn btn-secondary mr-2"> Pause Job{this.state.selectedCount > 1 ? "s" : ""} </button>
+            <button onClick={() => {this.resumeJobs()}} 
+                disabled={!this.state.hasSelected}
+                class="btn btn-secondary mr-2"> Resume Job{this.state.selectedCount > 1 ? "s" : ""} </button>
             <button onClick={() => {this.moreInfo()}} 
                 disabled={!this.state.hasSelected} 
                 class="btn btn-secondary mr-2" > More Info </button>
