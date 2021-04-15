@@ -8,7 +8,7 @@ export default class History extends React.Component {
           accessToken : "",
           jobs : [],
           error : "",
-          totalPages : 0
+          totalPages : 0,
           selectedCount: 0,
           hasSelected: false,
         }
