@@ -9,7 +9,7 @@ export default class History extends React.Component {
           jobs : [],
           error : "",
           selectedCount: 0,
-          isSelected: false,
+          hasSelected: false,
         }
     }
 
@@ -44,7 +44,8 @@ export default class History extends React.Component {
     rescheduleJobs() { 
         var count = 0;
         var msgIds = "";
-        this.state.jobs.map((job) => { 
+
+        this.state.jobs.foreach((job) => { 
             if (job.isChecked) { 
                 msgIds += job.jobId + "\n";
                 count += 1;
@@ -54,8 +55,13 @@ export default class History extends React.Component {
         console.log(message);
     }
 
+    moreInfo() { 
+    }
+
     fetchJobs() {
-        this.state.error = ""
+        this.setState({
+            error: ""
+        });
         if(this.state.accessToken !== "") {
             const config = {
                 headers: {
@@ -97,14 +103,21 @@ export default class History extends React.Component {
         }
     }
 
-    handleChange(job, e) { 
+    handleCheck(job, e) { 
+        console.log(this.state);
         job.isChecked = e.target.checked;
         if (e.target.checked) { 
-            this.state.selectedCount += 1; 
+            this.setState({
+                selectedCount: this.state.selectedCount + 1,
+                hasSelected: true,
+            }); 
         } else { 
-            this.state.selectedCount -= 1; 
+            if (this.state.selectedCount - 1 <= 0)  { 
+                this.setState({hasSelected: false});
+            }
+            this.setState({selectedCount: this.state.selectedCount - 1}); 
         }
-        this.state.isSelected = this.state.selectedCount == 0 ? false : true;
+//        this.forceUpdate();
     }
 
     render() {
@@ -112,8 +125,12 @@ export default class History extends React.Component {
           <div>
             <button onClick={() => {this.fetchJobs()}} class="btn btn-primary mr-2" > Search </button>
             <button onClick={() => {this.fetchJobs()}} class="btn btn-secondary mr-2" > Reset </button>
-            <button onClick={() => {this.rescheduleJobs()}} class="btn btn-secondary mr-2"> Reschedule Job(s) </button>
-            <button onClick={() => {this.rescheduleJobs()}} class="btn btn-secondary mr-2" > More Info </button>
+            <button onClick={() => {this.rescheduleJobs()}} 
+                disabled={!this.state.hasSelected}
+                class="btn btn-secondary mr-2"> Reschedule Job(s) </button>
+            <button onClick={() => {this.moreInfo()}} 
+                disabled={!this.state.hasSelected} 
+                class="btn btn-secondary mr-2" > More Info </button>
             <br/>
 
             {this.state.error 
@@ -128,8 +145,8 @@ export default class History extends React.Component {
                     <th>Org ID</th>
                   </tr>
                     {this.state.jobs.map(job => (
-                      <tr>
-                        <td><input type="checkbox" onChange={(e) => this.handleChange(job, e)}/></td>
+                      <tr key={job.jobId + job.eventTime}>
+                        <td><input type="checkbox" onChange={(e) => this.handleCheck(job, e)}/></td>
                         <td>{job.jobId}</td>
                         <td>{job.jobInstanceId}</td>
                         <td>{job.eventTime}</td>
