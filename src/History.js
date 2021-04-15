@@ -45,7 +45,7 @@ export default class History extends React.Component {
         var count = 0;
         var msgIds = "";
 
-        this.state.jobs.foreach((job) => { 
+        this.state.jobs.map((job) => { 
             if (job.isChecked) { 
                 msgIds += job.jobId + "\n";
                 count += 1;
