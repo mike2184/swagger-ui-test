@@ -7,7 +7,8 @@ export default class Scheduler extends React.Component {
     
         this.state = {
             accessToken : "",
-            job: null
+            error : "",
+            msg: "",
         }
     }
 
@@ -15,7 +16,9 @@ export default class Scheduler extends React.Component {
         this.getServiceToken();
     }
 
-    fetchJobById() {
+    // action = resume, pause
+    changeJobState(action) {
+        this.setState({error: ""},{msg: ""});
         if(this.state.accessToken !== "") {
             const config = {
                 headers: {
@@ -23,22 +26,78 @@ export default class Scheduler extends React.Component {
                   'x-service-auth': this.state.accessToken
                 },
                 params: {
-                    'solution': 'WORKSPACE',
-                    // TODO - I don't see event groups in history service but they are a required parameter to call
-                    // the scheduler service. Do we need to add event group to the information we store in history service?
-                    'eventGroup': 'testEventGroup' 
+                    'eventGroup': this.state.orgId,
+                    'solution': 'WORKSPACE', // hard coded to WORKSPACE solution for now
                 }
-            }
-            axios.get(process.env.REACT_APP_SCHEDULER_SERVICE_URL + 'events/test', config)
+            };
+            axios.get(process.env.REACT_APP_SCHEDULER_SERVICE_URL
+              + 'events/' + this.props.jobId + '/' + action, config)
                 .then((result) => {
-                    //console.log(result);
+                    console.log(result);
                     this.setState({
-                       job: result.data
+                       msg: 'job:' + this.props.jobId + ' ' + action + ' success'
                     });
                 })
                 .catch((err) => {
                     console.log(err);
+                    this.setState({msg: ""});
+                    if (err.response && err.response.status) { 
+                        this.setState({error: this.handleErrorByResponse(err.response)});
+                    } else {
+                        this.setState({error: "Unknown error occurred. " + err});
+                    }
             });
+        }
+        else {
+            console.log("Access token is not set.");
+            this.setState({error: "Access token is not set."});
+        }
+    }
+
+    // action = resumeall, pauseall
+    changeJobsState(action) {
+        this.setState({error: ""},{msg: ""});
+        if(this.state.accessToken !== "") {
+            const config = {
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-service-auth': this.state.accessToken
+                },
+                params: {
+                    'eventGroup': this.state.orgId,
+                    'solution': 'WORKSPACE', // hard coded to WORKSPACE solution for now
+                }
+            };
+            axios.get(process.env.REACT_APP_SCHEDULER_SERVICE_URL
+              + 'events/' + action, config)
+                .then((result) => {
+                    console.log(result);
+                    this.setState({
+                       msg: 'org:' + this.props.orgId + ' ' + action + ' success'
+                    });
+                })
+                .catch((err) => {
+                    console.log(err);
+                    this.setState({msg: ""});
+                    if (err.response && err.response.status) { 
+                        this.setState({error: this.handleErrorByResponse(err.response)});
+                    } else {
+                        this.setState({error: "Unknown error occurred. " + err});
+                    }
+            });
+        }
+        else {
+            console.log("Access token is not set.");
+            this.setState({error: "Access token is not set."});
+        }
+    }
+
+    handleErrorByResponse(response) { 
+        switch(response.status) { 
+            case 404:
+                return 'No results found';
+            default:
+                return 'Unknown status: ' + response.status;
         }
     }
 
@@ -63,37 +122,5 @@ export default class Scheduler extends React.Component {
             .catch((err) => {
                 console.log(err);
             });
-    }
-
-    render() {
-        if (this.state.job === null) {
-            return (
-                <div>
-                    <button onClick={() => {this.fetchJobById()}}>Fetch Job by ID</button>
-                </div>
-            );
-            } else {
-            return (
-                <div>
-                    <button onClick={() => {this.fetchJobById()}}>Fetch Job by ID</button>
-                    <table className="job-info">
-                        <tr>
-                            <th>Job ID</th>
-                            <th>Job Instance ID</th>
-                            <th>Event Time</th>
-                            <th>Event Type</th>
-                            <th>Org ID</th>
-                        </tr>
-                        <tr key={this.state.job}>
-                            <td>{this.state.job.jobId}</td>
-                            <td>{this.state.job.jobInstanceId}</td>
-                            <td>{this.state.job.eventTime}</td>
-                            <td>{this.state.job.eventType}</td>
-                            <td>{this.state.job.orgId}</td>
-                        </tr>
-                    </table>
-                </div>
-            );
-        }
     }
 }
