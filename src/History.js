@@ -87,7 +87,11 @@ export default class History extends React.Component {
                 });
             } else {
                 let curPage = 0;
-                await this.getTotalPages();
+                await this.getTotalPages()
+                        .catch((err) => {
+                           console.log(err);
+                           this.setState({error: "Error getting total result pages: " + err});
+                        });
                 do {
                     const config = {
                         headers: {
