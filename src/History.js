@@ -40,8 +40,26 @@ export default class History extends React.Component {
             });
     }
 
-    fetchJobs() {
+    async getTotalPages() {
+        const config = {
+            headers: {
+              'Content-Type': 'application/json',
+              'x-service-auth': this.state.accessToken
+            },
+            params: {
+                startTime: this.props.startTime,
+                endTime: this.props.endTime,
+                page: 0
+            }
+        }
+        let result = await axios.get(process.env.REACT_APP_HISTORY_SERVICE_URL
+          + 'timeframe', config);
+        this.setState({totalPages : result.data.totalPages});
+    }
+
+    async fetchJobs() {
         this.state.error = ""
+        this.state.jobs = []
         if(this.state.accessToken !== "") {
             if(this.props.startTime == null && this.props.endTime == null) {
                 const config = {
@@ -68,8 +86,8 @@ export default class History extends React.Component {
                         }
                 });
             } else {
-                let results = [];
                 let curPage = 0;
+                await this.getTotalPages();
                 do {
                     const config = {
                         headers: {
@@ -85,7 +103,6 @@ export default class History extends React.Component {
                     axios.get(process.env.REACT_APP_HISTORY_SERVICE_URL
                       + 'timeframe', config)
                         .then((result) => {
-                            this.setState({totalPages : result.data.totalPages});
                             this.setState({
                                 jobs: this.state.jobs.concat(result.data.content)
                             });
