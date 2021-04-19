@@ -9,13 +9,10 @@ export default class History extends React.Component {
           jobs : [],
           error : "",
           totalPages : 0,
-          curPage : 0,
           selectedCount: 0,
           hasSelected: false,
+          selectedJobs: []
         }
-        this.fetchJobs = this.fetchJobs.bind(this);
-        this.fetchJobByTime = this.fetchJobByTime.bind(this);
-        this.testIt =  this.testIt.bind(this);
     }
 
     componentDidMount() {
@@ -46,6 +43,24 @@ export default class History extends React.Component {
             });
     }
 
+    async getTotalPages() {
+        const config = {
+            headers: {
+              'Content-Type': 'application/json',
+              'x-service-auth': this.state.accessToken
+            },
+            params: {
+                startTime: this.props.startTime,
+                endTime: this.props.endTime,
+                page: 0
+            }
+        }
+        let result = await axios.get(process.env.REACT_APP_HISTORY_SERVICE_URL
+          + 'timeframe', config);
+        this.setState({totalPages : result.data.totalPages});
+    }
+
+
     rescheduleJobs() {
         var count = 0;
         var msgIds = "";
@@ -69,15 +84,15 @@ export default class History extends React.Component {
     moreInfo() {
     }
 
-    fetchJobs() {
+    async fetchJobs() {
         this.setState({
-            error: ""
+            error: "",
+            jobs: []
         });
 
         if(this.state.accessToken !== "") {
             if(this.props.startTime == null && this.props.endTime == null) {
-               console.log("standard search");
-
+                console.log("standard search");
                 const config = {
                     headers: {
                       'Content-Type': 'application/json',
@@ -102,6 +117,13 @@ export default class History extends React.Component {
                         }
                 });
             } else {
+                let curPage = 0;
+                await this.getTotalPages()
+                        .catch((err) => {
+                           console.log(err);
+                           this.setState({error: "Error getting total result pages: " + err});
+                        });
+
                 do {
                     const config = {
                         headers: {
@@ -111,39 +133,33 @@ export default class History extends React.Component {
                         params: {
                             startTime: this.props.startTime,
                             endTime: this.props.endTime,
-                            page: this.state.curPage
+                            page: curPage++
                         }
                     };
 
-                    this.fetchJobByTime(config).then(data =>{
-                      console.log('good');
+                    axios.get(process.env.REACT_APP_HISTORY_SERVICE_URL
+                      + 'timeframe', config)
+                        .then((result) => {
+                            this.setState({
+                                jobs: this.state.jobs.concat(result.data.content)
+                            });
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                            this.setState({jobs: []});
+                            if (err.response && err.response.status) {
+                                this.setState({error: this.handleErrorByResponse(err.response)});
+                            } else {
+                                this.setState({error: "Unknown error occurred. " + err});
+                            }
                     });
-
-                } while (false)
+                } while (curPage < this.state.totalPages)
             }
         }
         else {
             console.log("Access token is not set.");
             this.setState({error: "Access token is not set."});
         }
-
-    }
-
-    fetchJobByTime(config){
-        axios.get(process.env.REACT_APP_HISTORY_SERVICE_URL
-          + 'timeframe', config)
-            .then((result) => {
-                console.log(result.data.totalPages);
-                return result.data;
-            })
-            .catch((err) => {
-                console.log(err);
-                return [];
-        });
-    }
-
-    testIt(){
-      console.log('hi');
     }
 
     handleErrorByResponse(response) {
@@ -156,8 +172,10 @@ export default class History extends React.Component {
     }
 
     handleCheck(job, e) {
+        console.log(this.state);
         job.isChecked = e.target.checked;
         if (e.target.checked) {
+            console.log('hi');
             this.setState({
                 selectedCount: this.state.selectedCount + 1,
                 hasSelected: true,
@@ -205,7 +223,7 @@ export default class History extends React.Component {
                 </thead>
                 <tbody>
                     {this.state.jobs.map(job => (
-                      <tr key={job.jobId + job.eventTime}>
+                      <tr key={Math.random()}>
                         <td><input type="checkbox" onChange={(e) => this.handleCheck(job, e)}/></td>
                         <td>{job.jobId}</td>
                         <td>{job.jobInstanceId}</td>
