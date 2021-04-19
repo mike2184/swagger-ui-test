@@ -9,7 +9,9 @@ export default class History extends React.Component {
           jobs : [],
           error : "",
           totalPages : 0,
-          curPage : 0
+          curPage : 0,
+          selectedCount: 0,
+          hasSelected: false,
         }
         this.fetchJobs = this.fetchJobs.bind(this);
         this.fetchJobByTime = this.fetchJobByTime.bind(this);
@@ -34,7 +36,7 @@ export default class History extends React.Component {
         }
         axios.post(process.env.REACT_APP_IMS_SERVICE_URL, params, config)
             .then((result) => {
-              //console.log(result);
+              console.log(result);
               this.setState({
                   accessToken: result.data.access_token
               });
@@ -44,7 +46,34 @@ export default class History extends React.Component {
             });
     }
 
+    rescheduleJobs() {
+        var count = 0;
+        var msgIds = "";
+
+        this.state.jobs.map((job) => {
+            if (job.isChecked) {
+                msgIds += job.jobId + "\n";
+                count += 1;
+            }
+        });
+        var message = `Are you sure you want to reschedule the following ${count} job(s)?\n${msgIds}`;
+        console.log(message);
+    }
+
+    pauseJobs() {
+    }
+
+    resumeJobs() {
+    }
+
+    moreInfo() {
+    }
+
     fetchJobs() {
+        this.setState({
+            error: ""
+        });
+
         if(this.state.accessToken !== "") {
             if(this.props.startTime == null && this.props.endTime == null) {
                console.log("standard search");
@@ -126,11 +155,39 @@ export default class History extends React.Component {
         }
     }
 
+    handleCheck(job, e) {
+        job.isChecked = e.target.checked;
+        if (e.target.checked) {
+            this.setState({
+                selectedCount: this.state.selectedCount + 1,
+                hasSelected: true,
+            });
+        } else {
+            if (this.state.selectedCount - 1 <= 0)  {
+                this.setState({hasSelected: false});
+            }
+            this.setState({selectedCount: this.state.selectedCount - 1});
+        }
+    }
+
     render() {
         return (
           <div>
             <button onClick={() => {this.fetchJobs()}} className="btn btn-primary mr-2" > Search </button>
             <button onClick={() => {this.fetchJobs()}} className="btn btn-secondary mr-2" > Reset </button>
+
+            <button onClick={() => {this.rescheduleJobs()}}
+                disabled={!this.state.hasSelected}
+                class="btn btn-secondary mr-2"> Reschedule Job{this.state.selectedCount > 1 ? "s" : ""} </button>
+            <button onClick={() => {this.pauseJobs()}}
+                disabled={!this.state.hasSelected}
+                class="btn btn-secondary mr-2"> Pause Job{this.state.selectedCount > 1 ? "s" : ""} </button>
+            <button onClick={() => {this.resumeJobs()}}
+                disabled={!this.state.hasSelected}
+                class="btn btn-secondary mr-2"> Resume Job{this.state.selectedCount > 1 ? "s" : ""} </button>
+            <button onClick={() => {this.moreInfo()}}
+                disabled={!this.state.hasSelected}
+                class="btn btn-secondary mr-2" > More Info </button>
             <br/>
 
             {this.state.error
@@ -138,6 +195,7 @@ export default class History extends React.Component {
             : <table className="job-list table table-hover table-striped">
                 <thead>
                   <tr>
+                    <th>☒</th>
                     <th>Job ID</th>
                     <th>Job Instance ID</th>
                     <th>Event Time</th>
@@ -147,7 +205,8 @@ export default class History extends React.Component {
                 </thead>
                 <tbody>
                     {this.state.jobs.map(job => (
-                      <tr key={Math.random()}>
+                      <tr key={job.jobId + job.eventTime}>
+                        <td><input type="checkbox" onChange={(e) => this.handleCheck(job, e)}/></td>
                         <td>{job.jobId}</td>
                         <td>{job.jobInstanceId}</td>
                         <td>{job.eventTime}</td>
